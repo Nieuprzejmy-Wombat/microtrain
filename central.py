@@ -1,6 +1,8 @@
 import select
 import config
 from collections import deque
+import logging
+import time
 
 
 class Reader:
@@ -31,6 +33,8 @@ class Reader:
 
 def main():
     reader = Reader(config.train_central_pipe_name)
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename="central.log", level=logging.INFO)
     with (
         open("slow.log", "w") as slow,
         open("normal.log", "w") as normal,
@@ -48,7 +52,10 @@ def main():
                     else:
                         print(msg_value, file=fast, flush=True)
                 case "station":
-                    pass
+                    logging.info(
+                        f"approaching station {msg_value.strip()} at {time.time()}"
+                    )
+
                 case _:
                     print(f"unknown message type: {msg_type}")
                     exit(1)

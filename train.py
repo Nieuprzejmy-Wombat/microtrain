@@ -2,7 +2,25 @@ from random import randint, random
 from time import sleep
 import config
 
-stations = ["Adamowo", "Adamowo (leśniczówka)", "Adampol", "Ahlbeck Grenze", "Aleksandrów", "Aleksandrów Kujawski", "Aleksandrów Kujawski Wąskotorowy","Aleksandrów Łódzki","Alfred","Alwernia" ,"Anastazewo" ,"Andaluzja","Andoria","Andrychów","Andrychów Górnica","Andrzejówka","Anielin Gradowo"] 
+stations = [
+    "Adamowo",
+    "Adamowo (leśniczówka)",
+    "Adampol",
+    "Ahlbeck Grenze",
+    "Aleksandrów",
+    "Aleksandrów Kujawski",
+    "Aleksandrów Kujawski Wąskotorowy",
+    "Aleksandrów Łódzki",
+    "Alfred",
+    "Alwernia",
+    "Anastazewo",
+    "Andaluzja",
+    "Andoria",
+    "Andrychów",
+    "Andrychów Górnica",
+    "Andrzejówka",
+    "Anielin Gradowo",
+]
 stations_len = len(stations)
 
 with open(config.train_central_pipe_name, "w") as f:
