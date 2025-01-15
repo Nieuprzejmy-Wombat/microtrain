@@ -1,44 +1,19 @@
-import select
 import config
-from collections import deque
 import logging
 import time
-
-
-class Reader:
-    def __init__(self, file: str) -> None:
-        self.poll = select.poll()
-        self.file = open(file, "r", encoding="utf-8")
-        self.poll.register(self.file, select.POLLIN | select.POLLPRI)
-        self.buffer = deque()
-
-    def __del__(self):
-        self.poll.unregister(self.file)
-        self.file.close()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        while not self.buffer:
-            self.buffer.extend(self.poll.poll())
-        ev = self.buffer.popleft()[1]
-        if ev & select.POLLIN or ev & select.POLLPRI:
-            return self.file.readline().strip()
-        elif ev & select.POLLHUP:
-            raise StopIteration()
-        else:
-            raise IOError(f"unhandled event: {ev}")
+from reader import Reader
 
 
 def main():
     reader = Reader(config.train_central_pipe_name)
+    lineman = Reader(config.lineman_central_pipe_name)
     logger = logging.getLogger(__name__)
     logging.basicConfig(filename="central.log", level=logging.INFO)
     with (
         open("slow.log", "w") as slow,
         open("normal.log", "w") as normal,
         open("fast.log", "w") as fast,
+        open(config.central_lineman_pipe_name, "w") as cl,
     ):
         for i in reader:
             msg_type, msg_value = i.split(":")
@@ -52,9 +27,19 @@ def main():
                     else:
                         print(msg_value, file=fast, flush=True)
                 case "station":
-                    logging.info(
+                    logger.info(
                         f"approaching station {msg_value.strip()} at {time.time()}"
                     )
+                    print("barrier?", file=cl, flush=True)
+                    barrier_state = next(lineman).strip()
+                    if barrier_state == True:
+                        logger.warning("barrier already closed")
+                    else:
+                        print("close", file=cl, flush=True)
+                        logger.info("sended barrier close request")
+                    time.sleep(4)
+                    print("open", file=cl, flush=True)
+                    logger.info("sended barrier open request")
 
                 case _:
                     print(f"unknown message type: {msg_type}")
