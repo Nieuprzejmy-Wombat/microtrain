@@ -23,9 +23,20 @@ stations = [
 ]
 stations_len = len(stations)
 
-with open(config.train_central_pipe_name, "w") as f:
-    while True:
-        for i in range(18):
-            print(f"speed: {random() * 180}", file=f, flush=True)
-            sleep(1)
-        print(f"station: {stations[randint(0, stations_len - 1)]}", file=f, flush=True)
+
+def main():
+    with open(config.train_central_pipe_name, "w") as f:
+        while True:
+            for _ in range(18):
+                print(f"speed: {random() * 180}", file=f, flush=True)
+                sleep(1)
+            print(
+                f"station: {stations[randint(0, stations_len - 1)]}", file=f, flush=True
+            )
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BrokenPipeError:
+        exit(0)
